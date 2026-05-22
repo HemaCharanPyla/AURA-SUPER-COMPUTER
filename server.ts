@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import { spawn } from "child_process";
 import puppeteer, { Browser, Page } from "puppeteer";
-import { createServer as createViteServer } from "vite";
+// Dynamic import inside core startup routine inside dev only to avoid runtime resolution errors in severless atmosphere
 
 // Standard dotenv loading for dev environment
 import "dotenv/config";
@@ -731,8 +731,12 @@ app.post("/pages/:id/messages", async (req, res) => {
         "#prompt-textarea",
         "textarea[placeholder*='ChatGPT']",
         "textarea[placeholder*='Message']",
+        "div[contenteditable='true']",
+        "div[role='textbox']",
         "textarea[tabindex='0']",
+        ".ProseMirror",
         "textarea",
+        "input",
         "[contenteditable='true']"
       ];
 
@@ -740,9 +744,12 @@ app.post("/pages/:id/messages", async (req, res) => {
         "#composer-submit-button",
         "button[data-testid*='send']",
         "button[data-testid*='submit']",
+        "button[aria-label*='Send']",
+        "button[aria-label*='Message']",
         "button.composer-submit-button",
         "form button[type='submit']",
-        "textarea + button"
+        "textarea + button",
+        "button" // catch-all button fallback
       ];
 
       session.status = "Locating prompt input text field...";
@@ -757,6 +764,7 @@ app.post("/pages/:id/messages", async (req, res) => {
           }, sel);
           if (present) {
             activeInputSelector = sel;
+            logEvent("info", `[Session ${id}] Located active input element via selector: "${sel}"`);
             break;
           }
         } catch {}
@@ -764,8 +772,26 @@ app.post("/pages/:id/messages", async (req, res) => {
 
       if (!activeInputSelector) {
         try {
-          await page.waitForSelector("#prompt-textarea", { timeout: 3000 });
-          activeInputSelector = "#prompt-textarea";
+          // General CSS query search in page environment to find any text field
+          const foundAnyInput = await page.evaluate(() => {
+            const potentialClasses = [
+              "#prompt-textarea",
+              "div[contenteditable='true']",
+              "textarea",
+              "div[role='textbox']"
+            ];
+            for (const c of potentialClasses) {
+              const el = document.querySelector(c) as HTMLElement | null;
+              if (el && el.getBoundingClientRect().width > 0) return c;
+            }
+            return "";
+          });
+          if (foundAnyInput) {
+            activeInputSelector = foundAnyInput;
+          } else {
+            await page.waitForSelector("#prompt-textarea", { timeout: 3000 });
+            activeInputSelector = "#prompt-textarea";
+          }
         } catch {
           throw new Error("Could not find interactive chat prompt field. Ensure active pre-authenticated web cookies are configured and synced in the 'Cookies' panel to bypass Cloudflare validation!");
         }
@@ -944,8 +970,9 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // Express server listening & Vite integration
 async function start() {
-  // Mount Vite development middle layer when not in production
-  if (process.env.NODE_ENV !== "production") {
+  // Mount Vite development middle layer when not in production and not on Vercel
+  if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -960,11 +987,18 @@ async function start() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    logEvent("success", `Express Server is actively listening on http://0.0.0.0:${PORT}`);
-  });
+  // Only bind port listener if we are not in a serverless environment (e.g. Vercel)
+  if (process.env.VERCEL) {
+    logEvent("info", "Vercel serverless atmosphere detected. Bypassing app.listen binding.");
+  } else {
+    app.listen(PORT, "0.0.0.0", () => {
+      logEvent("success", `Express Server is actively listening on http://0.0.0.0:${PORT}`);
+    });
+  }
 }
 
 start().catch((err) => {
   console.error("Critical error starting Express Server:", err);
 });
+
+export default app;

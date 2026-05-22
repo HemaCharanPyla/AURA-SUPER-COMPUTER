@@ -446,7 +446,7 @@ export default function App() {
       {
         name: "cf_clearance",
         value: "REPLACE_WITH_YOUR_CF_CLEARANCE_VALUE",
-        domain: ".openai.com",
+        domain: ".chatgpt.com",
         path: "/",
         expires: 9999999999,
         httpOnly: true,
@@ -456,7 +456,7 @@ export default function App() {
       {
         name: "__Secure-next-auth.session-token",
         value: "REPLACE_WITH_YOUR_SESSION_TOKEN",
-        domain: "chatgpt.com",
+        domain: ".chatgpt.com",
         path: "/",
         expires: 9999999999,
         httpOnly: true,
@@ -975,14 +975,23 @@ export default function App() {
             {selectedSession ? (
               <>
                 {/* Fallback Simulation Notice */}
-                {selectedSession.mode === "simulation" && (
+                {selectedSession.mode === "simulation" ? (
                   <div className="mb-4 p-3 bg-[#D9FF00]/10 border border-[#D9FF00]/20 text-[#D9FF00] text-[11px] font-mono leading-relaxed space-y-1">
                     <div className="font-extrabold flex items-center gap-1.5 uppercase tracking-wider">
-                      <Sparkles className="h-3.5 w-3.5" /> Emulation Mode Active
+                      <Sparkles className="h-3.5 w-3.5 animate-pulse" /> AI Emulation Active
                     </div>
                     <div className="text-white/60 text-[10px]">
                       Headless Chrome is bypassed. This session is running queries smoothly via <span className="text-[#D9FF00] font-bold">AURA ChatGPT-4o Offline Emulation Core</span>. 
-                      To use real Puppeteer automation on live ChatGPT webpages, configure valid OpenAI session cookies in the <span className="text-[#D9FF00] font-bold">Cookies</span> pane.
+                      To use real-world Puppeteer actions, import actual browser session cookies into the <span className="text-[#D9FF00] font-bold">Cookie Sync</span> tab to bypass Cloudflare validation blocks.
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4 p-3 bg-zinc-900 border border-white/5 text-[11px] font-mono leading-relaxed space-y-1">
+                    <div className="font-extrabold flex items-center gap-1.5 uppercase tracking-wider text-white/90">
+                      <Terminal className="h-3.5 w-3.5 text-[#D9FF00]" /> Real-time Puppeteer Bot Active
+                    </div>
+                    <div className="text-white/60 text-[10px]">
+                      AURA is automating a real virtual Chromium browser session. In case of errors or Cloudflare blocks, configure valid active OpenAI session cookies in the <span className="text-[#D9FF00] font-bold">Cookie Sync</span> tab.
                     </div>
                   </div>
                 )}
