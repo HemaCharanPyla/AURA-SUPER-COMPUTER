@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AURA Supercomputer | Powered by OpenAI</title>
+    <script>
+      // Support overwriting of window.fetch by extensions or sandboxes without throwing errors
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          var customFetch = originalFetch;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() {
+              return customFetch || originalFetch;
+            },
+            set: function(val) {
+              customFetch = val;
+            }
+          });
+        } catch (e) {
+          console.warn('Failed to define fetch property wrapper:', e);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

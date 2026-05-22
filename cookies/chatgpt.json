@@ -1,0 +1,12 @@
+[
+  {
+    "name": "cf_clearance",
+    "value": "YOUR_COOKIE_VALUE_HERE",
+    "domain": ".openai.com",
+    "path": "/",
+    "expires": 9999999999,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "name": "AURA Supercomputer",
+  "description": "Headless Chrome automation workspace and OpenAI-powered supercomputer dashboard",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
