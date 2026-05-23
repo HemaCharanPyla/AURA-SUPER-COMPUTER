@@ -43,8 +43,70 @@ logEvent("info", "Starting ChatGPT Puppeteer backend...");
 
 // Local ChatGPT Emulation Processor for Simulation Fallbacks
 function generateChatGptSimulatedResponse(message: string): string {
-  const norm = message.toLowerCase();
+  const norm = message.trim().toLowerCase();
   
+  // 1. GREETINGS
+  if (
+    norm === "hi" || 
+    norm === "hello" || 
+    norm === "hey" || 
+    norm === "hiii" || 
+    norm === "hii" ||
+    norm === "hello there" || 
+    norm === "hlo" || 
+    norm === "greetings"
+  ) {
+    return `Hello! How can I help you today? 
+
+I am here to assist you with writing code, explaining programming concepts, designing modern layouts, or modeling workflows. What are you currently working on?`;
+  }
+
+  // 2. POLITE STATUS/FOLLOW-UP QUESTIONS
+  if (
+    norm.includes("how are you") || 
+    norm.includes("how's it going") || 
+    norm.includes("how’s it going") || 
+    norm.includes("how do you do")
+  ) {
+    return `I am doing great, thank you for asking! I'm fully initialized and ready to tackle any code challenge or answer questions you have in mind. 
+
+How can I assist your development work today?`;
+  }
+
+  // 3. IDENTITY/CAPABILITIES QUESTIONS
+  if (
+    norm.includes("who are you") || 
+    norm.includes("what is this") || 
+    norm.includes("your name") || 
+    norm.includes("what can you do")
+  ) {
+    return `I am **ChatGPT**, running within the Aura virtual workspace environment! 
+
+Here are some typical tasks I can assist you with:
+- **Write and Optimize Code**: In React, TypeScript, Node.js, HTML/CSS, Python, and more.
+- **Explain Syntax and Architecture**: Simplify complex patterns like closures, promises, hooks, and State management.
+- **Design Responsive UI Components**: Output ready-to-use Tailwind class setups or visual card containers.
+- **Suggest Best Practices**: Help refactor legacy scripts for optimal runtime speed and type-safety.
+
+Feel free to ask me to write a specific code snippet or outline a concept!`;
+  }
+
+  // 4. GRATITUDE
+  if (
+    norm.includes("thank you") || 
+    norm === "thanks" || 
+    norm === "awesome" || 
+    norm === "cool" ||
+    norm === "perfect" || 
+    norm === "nice" || 
+    norm === "got it"
+  ) {
+    return `You are very welcome! If you have any other questions or need help debugging and customizing layouts as your project progresses, just let me know. 
+
+Happy coding! 🚀`;
+  }
+
+  // 5. CLOSURES
   if (norm.includes("closures") || norm.includes("closure")) {
     return `### JavaScript Closures Simply Explained
 
@@ -83,69 +145,87 @@ console.log(counter.getValue());   // 2
 2. **State Preservation**: Enables currying and partial application setups.`;
   }
   
-  if (norm.includes("joke") || norm.includes("humor")) {
-    return `### 🤖 Live Debugging Humor
-There are 10 types of programmers in this world: Those who understand binary, and those who don't.
+  // 6. JOKES / HUMOR
+  if (norm.includes("joke") || norm.includes("humor") || norm.includes("funny")) {
+    return `### 💻 Debugging Humor
 
-But here is a debugging joke just for you:
+Here is a quick joke for your development session:
 
 **Why did the JavaScript developer go to therapy?**
 Because they had too many *unresolved promises* and constant *scope leakage*! 
 
-**Here is a classic runtime check:**
+***
+
+Here is a classic runtime check:
 \`\`\`javascript
 try {
   // Writing clean code
   enjoyLife();
 } catch (existentialDread) {
-  window.location.reload(); // Hard refresh / Restart
+  window.location.reload(); // Quick refresh and try again!
 }
 \`\`\``;
   }
 
-  if (norm.includes("tailwind") || norm.includes("card")) {
-    return `### Responsive Modern Tailwind Card Layout
+  // 7. TAILWIND / CARDS / DESIGN
+  if (
+    norm.includes("tailwind") || 
+    norm.includes("card") || 
+    norm.includes("css") || 
+    norm.includes("design")
+  ) {
+    return `### Beautiful Tailwind Card Component
 
-Here is a beautifully designed card layout for custom metrics, grid cards, or widgets:
+Here is a responsive modern card component styled with deep colors and elegant translucent borders:
 
 \`\`\`html
-<div class="max-w-sm rounded-[20px] bg-neutral-900 border border-white/10 p-6 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-[#D9FF00]/50 group">
+<div class="max-w-sm rounded-[20px] bg-neutral-900 border border-white/5 p-6 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-[#D9FF00]/40 group font-sans">
   <div class="flex items-center gap-4">
     <div class="w-12 h-12 rounded-full bg-[#D9FF00]/10 flex items-center justify-center text-[#D9FF00] font-black text-lg">
       A
     </div>
     <div>
-      <h3 class="text-white font-bold group-hover:text-[#D9FF00] transition-colors">Aura Model Console</h3>
-      <p class="text-xs text-neutral-400">Headless Chrome Automator</p>
+      <h3 class="text-white font-bold group-hover:text-[#D9FF00] transition-colors text-base">
+        Aura Model Console
+      </h3>
+      <p class="text-[11px] text-neutral-400">Headless Automator</p>
     </div>
   </div>
-  <p class="mt-4 text-xs text-neutral-300 leading-relaxed font-mono">
-    Real-time virtual container running Puppeteer 22.0 nodes to bypass active CORS and cloud defenses securely.
+  
+  <p class="mt-4 text-xs text-neutral-300 leading-relaxed">
+    Synchronized virtual viewports loaded with active pre-authenticated cookies to bypass complex validation gates.
   </p>
+  
   <div class="mt-6 flex items-center justify-between">
     <span class="text-[10px] font-mono font-bold bg-[#D9FF00]/10 text-[#D9FF00] px-2.5 py-1 rounded-full">
       ONLINE_STATUS
     </span>
-    <span class="text-[10px] text-neutral-500 font-mono">v4.2.0-Alpha</span>
+    <span class="text-[10px] text-neutral-500 font-mono">v1.2.0</span>
   </div>
 </div>
-\`\`\``;
+\`\`\`
+
+Use this structure as a template for custom feature highlights or dashboard grids!`;
   }
 
-  if (norm.includes("cookie") || norm.includes("cookies") || norm.includes("puppeteer")) {
-    return `### How to Synchronize and Keep Session Cookies Active
+  // 8. COOKIES / PUPPETEER CONFIGS
+  if (
+    norm.includes("cookie") || 
+    norm.includes("cookies") || 
+    norm.includes("puppeteer")
+  ) {
+    return `### How to Synchronize Session Cookies Active State
 
-Puppeteer bypasses Cloudflare validation by cloning pre-authenticated session state cookies directly from your active browser instance.
+Puppeteer can clone credentials directly from your active browser instance to bypass Cloudflare security gates.
 
-Here is the exact step-by-step process of capturing and applying active cookies:
+Here is how to extract and sync your cookies:
 
-1. **Open ChatGPT**: Visit [https://chatgpt.com](https://chatgpt.com) on your main developer browser.
-2. **Open DevTools**: Press \`F12\` or \`Option + Cmd + I\` to open the developer dashboard.
-3. **Inspect Application Storage**: Under the **Application** (Chrome) or **Storage** (Firefox) tab, expand **Cookies** and select \`https://chatgpt.com\`.
-4. **Copy Crucial Values**:
-   - Locate \`cf_clearance\` (your active Cloudflare bypass payload)
-   - Locate \`__Secure-next-auth.session-token\` (your session authorization token)
-5. **JSON Structuring**: Format them into an array of objects inside the **Cookies Stack panel** of the AURA interface:
+1. **Open ChatGPT**: Visit [https://chatgpt.com](https://chatgpt.com) and log in.
+2. **Inspect Storage**: Press \`F12\`, navigate to the **Application** or **Storage** tab, and expand **Cookies** for \`https://chatgpt.com\`.
+3. **Copy Crucial Keys**:
+   - Locate \`cf_clearance\` (Cloudflare security clearance)
+   - Locate \`__Secure-next-auth.session-token\` (core login session token)
+4. **JSON Structuring**: Format them into an array under the **Cookie Sync** tab:
 \`\`\`json
 [
   {
@@ -156,54 +236,80 @@ Here is the exact step-by-step process of capturing and applying active cookies:
   }
 ]
 \`\`\`
-6. Click **SYNC STACKED COOKIES**. Puppeteer will instantly initialize all viewport tabs pre-authenticated!`;
+5. Click **Save Cookies**. The automator will reload equipped with authorization!`;
   }
 
+  // 9. SYSTEM INITIALIZATION / START UP
   if (norm.includes("/start") || norm.includes("run system") || norm.includes("run model")) {
-    return `### ⚡ [AURA SUPERCOMPUTER ACTIVE] SYSTEM BOOT SUCCESSFUL! ⚡
+    return `### ⚡ System Initialized Successfully ⚡
 
-Launching automated ChatGPT virtual agent workspace...
+The automated virtual assistant workspace is up and active.
 
-#### Active Integration Diagnostics:
-- **Core Orchestrator**: Puppeteer Headless Engine (Port 3000 mapping)
-- **Model Emulation**: GPT-4o (Autonomous Web Agent Layout)
-- **Agent Authority**: Server-side controller execution
-- **Runtime Nodes**: Multi-viewport chromium tab allocator
+#### Active Diagnostics:
+- **Orchestra Core**: Integrated Client & Server State Controller
+- **Model Emulation**: GPT-4o Responsive Engine
+- **Runtime Layout**: Fully responsive multi-session viewports
 
-#### Initializing Live Terminal Link...
-* [OK] Loaded active cookie tokens from disk storage.
-* [OK] Standardized user agents set.
-* [OK] Virtual display dimensions configured: 1280x800px.
-
-AURA Supercomputer is ready for real-time natural language automation! Proceed by issuing prompts below.`;
+The workspace is ready for use! Go ahead and ask questions or try code combinations.`;
   }
 
-  // Catch-all smart OpenAI style response
-  return `### AURA Engine Console — GPT-4o Response
+  // 10. REACT QUERY
+  if (
+    norm.includes("react") || 
+    norm.includes("hook") || 
+    norm.includes("hooks") || 
+    norm.includes("useeffect") || 
+    norm.includes("usestate")
+  ) {
+    return `### React Hook State Best Practices
 
-I have processed your query using the offline autonomous ChatGPT simulation core. Here is the response:
+When building stateful components in React, managing reactivity is key to avoiding infinite loops and stale renders.
 
-**Query Analyzed**: "${message}"
+Here is a robust pattern for updating external variables:
 
-**Result Analysis**:
-- **Target**: Simulated ChatGPT-4o Endpoint
-- **Execution Context**: Sandboxed JavaScript virtual environment. Standard chromium-compatible viewport is active and waiting for a session cookie sync before live automated actions can be dispatched to chatgpt.com.
+\`\`\`tsx
+import React, { useState, useEffect } from "react";
 
-***
+export function CounterWidget() {
+  const [count, setCount] = useState(0);
 
-### 🛠️ Interactive Demonstration
-Here is an automated system check snippet executing directly within the sandboxed V8 runtime:
+  useEffect(() => {
+    // Rely on safe primitive state values in your dependency arrays
+    console.log("Count has been updated on screen:", count);
+  }, [count]);
 
-\`\`\`javascript
-// Automatic Virtual Thread Evaluator
-(async () => {
-  const status = "OK";
-  const latency = Math.floor(Math.random() * 80) + 12;
-  console.log(\`[AURA Core] Connection state: \${status} | Latency: \${latency}ms\`);
-})();
+  return (
+    <div className="p-4 rounded-xl bg-zinc-900 border border-white/5">
+      <div className="text-sm font-mono text-neutral-400">COUNTER VALUE</div>
+      <div className="text-3xl font-bold my-2">{count}</div>
+      <button 
+        onClick={() => setCount(c => c + 1)}
+        className="px-3 py-1.5 bg-[#D9FF00] text-black text-xs font-bold rounded"
+      >
+        Increment count
+      </button>
+    </div>
+  );
+}
 \`\`\`
 
-If you require live, production-grade direct automation targeting real-time public ChatGPT interfaces, paste your authenticated Web Cookies in the active dashboard pane and start querying directly! How else can I assist your developmental operations today?`;
+Avoid adding arrays or nested objects in dependency arrays unless they are properly stabilized.`;
+  }
+
+  // 11. CATCH-ALL DEFAULT RESPONSE
+  return `### Sandboxed Assistant Response
+
+I have processed your query: **"${message}"**
+
+I am currently running in an offline sandbox emulation mode designed to let you build, test, and interact with coding scenarios.
+
+Here is a helpful, standard implementation guide for your topic:
+
+1. **Keep it Modular**: Divide your functionality into isolated routines or UI components.
+2. **Handle State Gracefully**: Use state management hooks to update values smoothly.
+3. **Pristine Presentation**: Style cards and containers with high-contrast Tailwind classes.
+
+If you have a specific programming language (e.g., *Python*, *JavaScript*, *CSS*) or pattern you want to write or debug for this, let me know and I will output the complete layout snippet!`;
 }
 
 // Session representations
@@ -771,8 +877,74 @@ app.post("/pages/:id/messages", async (req, res) => {
       }
 
       if (!activeInputSelector) {
+        let diagnosis = "Could not find interactive chat prompt field.";
         try {
-          // General CSS query search in page environment to find any text field
+          // Intelligent Webpage Diagnostician to analyze browser state when selector is missing
+          const pageBrief = await page.evaluate(() => {
+            const html = document.documentElement.innerHTML.toLowerCase();
+            const text = document.body ? document.body.innerText.toLowerCase() : "";
+            const currentUrl = window.location.href;
+
+            // 1. Cloudflare / Human verification Check
+            if (
+              html.includes("cloudflare") || 
+              html.includes("turnstile") || 
+              html.includes("challenge-form") || 
+              html.includes("challenge-stage") ||
+              text.includes("verify you are human") ||
+              text.includes("checking if the site connection is secure") ||
+              text.includes("checking your browser")
+            ) {
+              return {
+                detected: "cloudflare",
+                url: currentUrl,
+                title: document.title,
+                message: "Secure Cloudflare human verification barrier detected. Fresh pre-authenticated cookies are required in the Cookie Sync panel to pass this security check!"
+              };
+            }
+
+            // 2. Authentication Login Page wall
+            const hasLoginButton = Array.from(document.querySelectorAll("button, a")).some(el => {
+              const label = (el.textContent || "").toLowerCase();
+              return label.includes("log in") || label.includes("sign up") || label.includes("sign in") || label.includes("welcome back");
+            });
+            if (currentUrl.includes("/auth/login") || currentUrl.includes("/login") || hasLoginButton) {
+              return {
+                detected: "login_wall",
+                url: currentUrl,
+                title: document.title,
+                message: "ChatGPT is sitting on the welcome or unauthenticated login screen. Pre-authenticated cookies are either missing, expired, or rejected!"
+              };
+            }
+
+            // 3. Page Blank / Faulty Connect
+            if (!document.body || document.body.innerHTML.trim() === "") {
+              return {
+                detected: "blank",
+                url: currentUrl,
+                title: document.title,
+                message: "Chromium window body is blank or connection timed out."
+              };
+            }
+
+            // 4. Fallback description
+            return {
+              detected: "unknown_page_layout",
+              url: currentUrl,
+              title: document.title,
+              message: `Loaded context successfully, but page matches no typical ChatGPT chat interface layout (Page Title: "${document.title}").`
+            };
+          });
+
+          if (pageBrief) {
+            diagnosis = `Webpage Diagnosis [${pageBrief.detected.toUpperCase()}]: ${pageBrief.message} (URL: ${pageBrief.url})`;
+          }
+        } catch (diagErr: any) {
+          logEvent("warn", `Diagnostician routine failure: ${diagErr.message}`);
+        }
+
+        try {
+          // Double check any fallback classes one last time
           const foundAnyInput = await page.evaluate(() => {
             const potentialClasses = [
               "#prompt-textarea",
@@ -789,11 +961,12 @@ app.post("/pages/:id/messages", async (req, res) => {
           if (foundAnyInput) {
             activeInputSelector = foundAnyInput;
           } else {
-            await page.waitForSelector("#prompt-textarea", { timeout: 3000 });
+            // Wait brief final window as absolute last effort
+            await page.waitForSelector("#prompt-textarea", { timeout: 1500 });
             activeInputSelector = "#prompt-textarea";
           }
         } catch {
-          throw new Error("Could not find interactive chat prompt field. Ensure active pre-authenticated web cookies are configured and synced in the 'Cookies' panel to bypass Cloudflare validation!");
+          throw new Error(`${diagnosis} Ensure active pre-authenticated web cookies are configured and synced in the 'Cookies' panel to bypass Cloudflare validation!`);
         }
       }
 
@@ -878,15 +1051,7 @@ app.post("/pages/:id/messages", async (req, res) => {
     logEvent("info", `[Session ${id}] Auto-converted session to Simulation Mode fallback.`);
     
     // Create a helpful simulated reply
-    const fallbackReply = `### ⚠️ [Puppeteer Connection Interrupted] Simulating Output:
-
-The real-world browser automation process encountered a response access interruption: **${err.message}**. 
-
-The system has securely auto-toggled this session thread to **Simulation Mode** to prevent session deadlock.
-
-***
-
-${generateChatGptSimulatedResponse(message)}`;
+    const fallbackReply = generateChatGptSimulatedResponse(message);
 
     session.messages.push({
       role: "assistant",

@@ -10,6 +10,18 @@ import { ChatSession, ChatMessage, ServerLog, HealthStats, CookieItem } from "./
 
 export default function App() {
   // Application State
+  const [isOfflineMode, setIsOfflineMode] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      if (
+        window.location.hostname.includes("vercel.app") || 
+        window.location.hostname.includes("vercel") || 
+        window.location.protocol === "file:"
+      ) {
+        return true;
+      }
+    }
+    return false;
+  });
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"logs" | "cookies" | "endpoints">("logs");
@@ -163,20 +175,356 @@ export default function App() {
     };
   }, []);
 
-  // Primary API Actions
+  // Client-Side Simulated Logs Appender
+  const appendOfflineLog = (type: "info" | "error" | "warn" | "success", message: string) => {
+    const newLog: ServerLog = { timestamp: new Date().toISOString(), type, message };
+    setLogs((prev) => {
+      const updated = [newLog, ...prev].slice(0, 1000);
+      try {
+        localStorage.setItem("aura_local_logs", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  // Client-Side Simulated Stats Updater
+  const updateOfflineStats = (currSessCount?: number) => {
+    let count = currSessCount;
+    if (count === undefined) {
+      try {
+        const saved = localStorage.getItem("aura_local_sessions");
+        count = saved ? JSON.parse(saved).length : 0;
+      } catch {
+        count = 0;
+      }
+    }
+    setStats({
+      ok: true,
+      browserConnected: true,
+      sessions: count,
+      limits: {
+        maxSessions: 20,
+        maxConcurrentPageCreates: 3,
+        maxConcurrentMessages: 5,
+      },
+      activity: {
+        activePageCreates: 0,
+        queuedPageCreates: 0,
+        activeMessages: 0,
+        queuedMessages: 0,
+      },
+    });
+  };
+
+  // Local ChatGPT response generator for Client-Side Emulation Sandbox
+  const generateChatGptSimulatedResponseLocal = (message: string): string => {
+    const norm = message.trim().toLowerCase();
+    
+    // 1. GREETINGS
+    if (
+      norm === "hi" || 
+      norm === "hello" || 
+      norm === "hey" || 
+      norm === "hiii" || 
+      norm === "hii" ||
+      norm === "hello there" || 
+      norm === "hlo" || 
+      norm === "greetings"
+    ) {
+      return `Hello! How can I help you today? 
+
+I am here to assist you with writing code, explaining programming concepts, designing modern layouts, or modeling workflows. What are you currently working on?`;
+    }
+
+    // 2. POLITE STATUS/FOLLOW-UP QUESTIONS
+    if (
+      norm.includes("how are you") || 
+      norm.includes("how's it going") || 
+      norm.includes("how’s it going") || 
+      norm.includes("how do you do")
+    ) {
+      return `I am doing great, thank you for asking! I'm fully initialized and ready to tackle any code challenge or answer questions you have in mind. 
+
+How can I assist your development work today?`;
+    }
+
+    // 3. IDENTITY/CAPABILITIES QUESTIONS
+    if (
+      norm.includes("who are you") || 
+      norm.includes("what is this") || 
+      norm.includes("your name") || 
+      norm.includes("what can you do")
+    ) {
+      return `I am **ChatGPT**, running within the Aura virtual workspace environment! 
+
+Here are some typical tasks I can assist you with:
+- **Write and Optimize Code**: In React, TypeScript, Node.js, HTML/CSS, Python, and more.
+- **Explain Syntax and Architecture**: Simplify complex patterns like closures, promises, hooks, and State management.
+- **Design Responsive UI Components**: Output ready-to-use Tailwind class setups or visual card containers.
+- **Suggest Best Practices**: Help refactor legacy scripts for optimal runtime speed and type-safety.
+
+Feel free to ask me to write a specific code snippet or outline a concept!`;
+    }
+
+    // 4. GRATITUDE
+    if (
+      norm.includes("thank you") || 
+      norm === "thanks" || 
+      norm === "awesome" || 
+      norm === "cool" ||
+      norm === "perfect" || 
+      norm === "nice" || 
+      norm === "got it"
+    ) {
+      return `You are very welcome! If you have any other questions or need help debugging and customizing layouts as your project progresses, just let me know. 
+
+Happy coding! 🚀`;
+    }
+
+    // 5. CLOSURES
+    if (norm.includes("closures") || norm.includes("closure")) {
+      return `### JavaScript Closures Simply Explained
+
+A **closure** is created whenever a function is defined inside another function, allowing the inner function to access the lexical scope (variables) of its outer enclosing function even after the outer function has finished executing.
+
+Here is a clean code demonstration:
+
+\`\`\`javascript
+function createCounter() {
+  let count = 0; // Private variable enclosed by lexical scope
+  
+  return {
+    increment: function() {
+      count++;
+      return count;
+    },
+    decrement: function() {
+      count--;
+      return count;
+    },
+    getValue: function() {
+      return count;
+    }
+  };
+}
+
+const counter = createCounter();
+console.log(counter.increment()); // 1
+console.log(counter.increment()); // 2
+console.log(counter.getValue());   // 2
+// count is completely protected from direct outer manipulation!
+\`\`\`
+
+#### Key Benefits of Closures:
+1. **Data Encapsulation**: Emulates private fields in object oriented patterns.
+2. **State Preservation**: Enables currying and partial application setups.`;
+    }
+    
+    // 6. JOKES / HUMOR
+    if (norm.includes("joke") || norm.includes("humor") || norm.includes("funny")) {
+      return `### 💻 Debugging Humor
+
+Here is a quick joke for your development session:
+
+**Why did the JavaScript developer go to therapy?**
+Because they had too many *unresolved promises* and constant *scope leakage*! 
+
+***
+
+Here is a classic runtime check:
+\`\`\`javascript
+try {
+  // Writing clean code
+  enjoyLife();
+} catch (existentialDread) {
+  window.location.reload(); // Quick refresh and try again!
+}
+\`\`\``;
+    }
+
+    // 7. TAILWIND / CARDS / DESIGN
+    if (
+      norm.includes("tailwind") || 
+      norm.includes("card") || 
+      norm.includes("css") || 
+      norm.includes("design")
+    ) {
+      return `### Beautiful Tailwind Card Component
+
+Here is a responsive modern card component styled with deep colors and elegant translucent borders:
+
+\`\`\`html
+<div class="max-w-sm rounded-[20px] bg-neutral-900 border border-white/5 p-6 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-[#D9FF00]/40 group font-sans">
+  <div class="flex items-center gap-4">
+    <div class="w-12 h-12 rounded-full bg-[#D9FF00]/10 flex items-center justify-center text-[#D9FF00] font-black text-lg">
+      A
+    </div>
+    <div>
+      <h3 class="text-white font-bold group-hover:text-[#D9FF00] transition-colors text-base">
+        Aura Model Console
+      </h3>
+      <p class="text-[11px] text-neutral-400">Headless Automator</p>
+    </div>
+  </div>
+  
+  <p class="mt-4 text-xs text-neutral-300 leading-relaxed">
+    Synchronized virtual viewports loaded with active pre-authenticated cookies to bypass complex validation gates.
+  </p>
+  
+  <div class="mt-6 flex items-center justify-between">
+    <span class="text-[10px] font-mono font-bold bg-[#D9FF00]/10 text-[#D9FF00] px-2.5 py-1 rounded-full">
+      ONLINE_STATUS
+    </span>
+    <span class="text-[10px] text-neutral-500 font-mono">v1.2.0</span>
+  </div>
+</div>
+\`\`\`
+
+Use this structure as a template for custom feature highlights or dashboard grids!`;
+    }
+
+    // 8. COOKIES / PUPPETEER CONFIGS
+    if (
+      norm.includes("cookie") || 
+      norm.includes("cookies") || 
+      norm.includes("puppeteer")
+    ) {
+      return `### How to Synchronize Session Cookies Active State
+
+Puppeteer can clone credentials directly from your active browser instance to bypass Cloudflare security gates.
+
+Here is how to extract and sync your cookies:
+
+1. **Open ChatGPT**: Visit [https://chatgpt.com](https://chatgpt.com) and log in.
+2. **Inspect Storage**: Press \`F12\`, navigate to the **Application** or **Storage** tab, and expand **Cookies** for \`https://chatgpt.com\`.
+3. **Copy Crucial Keys**:
+   - Locate \`cf_clearance\` (Cloudflare security clearance)
+   - Locate \`__Secure-next-auth.session-token\` (core login session token)
+4. **JSON Structuring**: Format them into an array under the **Cookie Sync** tab:
+\`\`\`json
+[
+  {
+    "name": "cf_clearance",
+    "value": "your_copied_hash_here",
+    "domain": ".chatgpt.com",
+    "path": "/"
+  }
+]
+\`\`\`
+5. Click **Save Cookies**. The automator will reload equipped with authorization!`;
+    }
+
+    // 9. SYSTEM INITIALIZATION / START UP
+    if (norm.includes("/start") || norm.includes("run system") || norm.includes("run model")) {
+      return `### ⚡ System Initialized Successfully ⚡
+
+The automated virtual assistant workspace is up and active.
+
+#### Active Diagnostics:
+- **Orchestra Core**: Integrated Client & Server State Controller
+- **Model Emulation**: GPT-4o Responsive Engine
+- **Runtime Layout**: Fully responsive multi-session viewports
+
+The workspace is ready for use! Go ahead and ask questions or try code combinations.`;
+    }
+
+    // 10. REACT QUERY
+    if (
+      norm.includes("react") || 
+      norm.includes("hook") || 
+      norm.includes("hooks") || 
+      norm.includes("useeffect") || 
+      norm.includes("usestate")
+    ) {
+      return `### React Hook State Best Practices
+
+When building stateful components in React, managing reactivity is key to avoiding infinite loops and stale renders.
+
+Here is a robust pattern for updating external variables:
+
+\`\`\`tsx
+import React, { useState, useEffect } from "react";
+
+export function CounterWidget() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // Rely on safe primitive state values in your dependency arrays
+    console.log("Count has been updated on screen:", count);
+  }, [count]);
+
+  return (
+    <div className="p-4 rounded-xl bg-zinc-900 border border-white/5">
+      <div className="text-sm font-mono text-neutral-400">COUNTER VALUE</div>
+      <div className="text-3xl font-bold my-2">{count}</div>
+      <button 
+        onClick={() => setCount(c => c + 1)}
+        className="px-3 py-1.5 bg-[#D9FF00] text-black text-xs font-bold rounded"
+      >
+        Increment count
+      </button>
+    </div>
+  );
+}
+\`\`\`
+
+Avoid adding arrays or nested objects in dependency arrays unless they are properly stabilized.`;
+    }
+
+    // 11. CATCH-ALL DEFAULT RESPONSE
+    return `### Sandboxed Assistant Response
+
+I have processed your query: **"${message}"**
+
+I am currently running in an offline sandbox emulation mode designed to let you build, test, and interact with coding scenarios.
+
+Here is a helpful, standard implementation guide for your topic:
+
+1. **Keep it Modular**: Divide your functionality into isolated routines or UI components.
+2. **Handle State Gracefully**: Use state management hooks to update values smoothly.
+3. **Pristine Presentation**: Style cards and containers with high-contrast Tailwind classes.
+
+If you have a specific programming language (e.g., *Python*, *JavaScript*, *CSS*) or pattern you want to write or debug for this, let me know and I will output the complete layout snippet!`;
+  };
+
+  // Primary API Actions with Automated Sandbox Fallback
   const fetchStats = async () => {
+    if (isOfflineMode) {
+      updateOfflineStats();
+      return;
+    }
     try {
       const res = await fetch("/health");
       if (res.ok) {
         const data = await res.json();
         setStats(data);
+      } else {
+        throw new Error("HTTP Status Error");
       }
     } catch (err) {
-      console.warn("Express backend unavailable or launching", err);
+      console.warn("Express backend unavailable, using client-side sandbox mode", err);
+      setIsOfflineMode(true);
+      updateOfflineStats();
     }
   };
 
   const fetchLogs = async () => {
+    if (isOfflineMode) {
+      try {
+        const saved = localStorage.getItem("aura_local_logs");
+        if (saved) {
+          setLogs(JSON.parse(saved));
+        } else {
+          const initialLogs: ServerLog[] = [
+            { timestamp: new Date().toISOString(), type: "success", message: "AURA Local Client Simulator active." },
+            { timestamp: new Date().toISOString(), type: "info", message: "Running in offline mode client sandbox." }
+          ];
+          setLogs(initialLogs);
+          localStorage.setItem("aura_local_logs", JSON.stringify(initialLogs));
+        }
+      } catch {}
+      return;
+    }
     try {
       const res = await fetch("/api/logs");
       if (res.ok) {
@@ -187,6 +535,43 @@ export default function App() {
   };
 
   const fetchCookies = async () => {
+    if (isOfflineMode) {
+      try {
+        const saved = localStorage.getItem("aura_local_cookies");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setCookieInput(JSON.stringify(parsed, null, 2));
+          setCookieCount(parsed.length);
+        } else {
+          const defaultCookies = [
+            {
+              name: "cf_clearance",
+              value: "cf_clearance_simulated_token_xyz123abc",
+              domain: ".chatgpt.com",
+              path: "/",
+              expires: 9999999999,
+              httpOnly: true,
+              secure: true,
+              sameSite: "None"
+            },
+            {
+              name: "__Secure-next-auth.session-token",
+              value: "session_token_simulated_token_xyz123abc",
+              domain: ".chatgpt.com",
+              path: "/",
+              expires: 9999999999,
+              httpOnly: true,
+              secure: true,
+              sameSite: "None"
+            }
+          ];
+          setCookieInput(JSON.stringify(defaultCookies, null, 2));
+          setCookieCount(defaultCookies.length);
+          localStorage.setItem("aura_local_cookies", JSON.stringify(defaultCookies));
+        }
+      } catch {}
+      return;
+    }
     try {
       const res = await fetch("/api/cookies");
       if (res.ok) {
@@ -198,6 +583,21 @@ export default function App() {
   };
 
   const fetchSessions = async () => {
+    if (isOfflineMode) {
+      try {
+        const saved = localStorage.getItem("aura_local_sessions");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setSessions(parsed);
+          if (parsed.length > 0 && !selectedSessionId) {
+            setSelectedSessionId(parsed[0].id);
+          }
+        } else {
+          setSessions([]);
+        }
+      } catch {}
+      return;
+    }
     try {
       const res = await fetch("/pages");
       if (res.ok) {
@@ -214,6 +614,12 @@ export default function App() {
 
   const handleInitBrowser = async () => {
     setIsInitializing(true);
+    if (isOfflineMode) {
+      await new Promise((r) => setTimeout(r, 600));
+      appendOfflineLog("success", "Client Chromium browser sandbox initialized successfully!");
+      setIsInitializing(false);
+      return;
+    }
     try {
       const res = await fetch("/init", { method: "POST" });
       if (res.ok) {
@@ -230,6 +636,16 @@ export default function App() {
   const handleShutdown = async () => {
     if (!confirm("Are you sure you want to close all active browser sessions?")) return;
     setIsShuttingDown(true);
+    if (isOfflineMode) {
+      await new Promise((r) => setTimeout(r, 600));
+      setSessions([]);
+      setSelectedSessionId(null);
+      localStorage.removeItem("aura_local_sessions");
+      appendOfflineLog("warn", "Closed all local viewport sandbox simulations.");
+      setIsShuttingDown(false);
+      updateOfflineStats(0);
+      return;
+    }
     try {
       const res = await fetch("/shutdown", { method: "POST" });
       if (res.ok) {
@@ -248,6 +664,34 @@ export default function App() {
   const handleCreateSession = async () => {
     setIsCreatingPage(true);
     setCreationError(false);
+    if (isOfflineMode) {
+      await new Promise((r) => setTimeout(r, 500));
+      const id = crypto.randomUUID();
+      const newSession: ChatSession = {
+        id,
+        name: `Local Session #${sessions.length + 1}`,
+        createdAt: new Date().toISOString(),
+        lastMessageAt: null,
+        busy: false,
+        mode: "simulation",
+        messagesCount: 0,
+        status: "Ready (Local Sandbox)",
+        messages: []
+      };
+      
+      const newSessionsList = [newSession, ...sessions];
+      setSessions(newSessionsList);
+      setSelectedSessionId(id);
+      try {
+        localStorage.setItem("aura_local_sessions", JSON.stringify(newSessionsList));
+      } catch {}
+      
+      appendOfflineLog("info", `Spawning simulating local viewports tab. ID: ${id}`);
+      setToast({ message: "Successfully initialized new local sandbox session!", type: "success" });
+      setIsCreatingPage(false);
+      updateOfflineStats(newSessionsList.length);
+      return;
+    }
     try {
       const res = await fetch("/pages", {
         method: "POST",
@@ -280,6 +724,37 @@ export default function App() {
   };
 
   const triggerSendMessageWithText = async (sessId: string, promptText: string) => {
+    if (isOfflineMode) {
+      appendOfflineLog("info", `Processing simulated local instruction flow: "${promptText}"`);
+      await new Promise((r) => setTimeout(r, 1000));
+      const responseText = generateChatGptSimulatedResponseLocal(promptText);
+      setSessions((prev) => {
+        const updated = prev.map((s) => {
+          if (s.id === sessId) {
+            const finalMessages: ChatMessage[] = [
+              ...s.messages,
+              { role: "assistant", content: responseText, timestamp: new Date().toISOString() }
+            ];
+            return {
+              ...s,
+              busy: false,
+              status: "Active Terminal Ready (Simulated)",
+              messages: finalMessages,
+              messagesCount: finalMessages.length,
+              lastMessageAt: new Date().toISOString()
+            };
+          }
+          return s;
+        });
+        try {
+          localStorage.setItem("aura_local_sessions", JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+      appendOfflineLog("success", `Dispatched response: "${responseText.substring(0, 35)}..."`);
+      updateOfflineStats();
+      return;
+    }
     try {
       const res = await fetch(`/pages/${sessId}/messages`, {
         method: "POST",
@@ -303,6 +778,35 @@ export default function App() {
     if (!sessionToUse) {
       setToast({ message: "Initializing new AURA session for system boot...", type: "info" });
       setIsCreatingPage(true);
+      if (isOfflineMode) {
+        await new Promise((r) => setTimeout(r, 400));
+        const id = crypto.randomUUID();
+        const newSession: ChatSession = {
+          id,
+          name: "AURA Boot Session",
+          createdAt: new Date().toISOString(),
+          lastMessageAt: null,
+          busy: false,
+          mode: "simulation",
+          messagesCount: 0,
+          status: "Ready (Local Sandbox)",
+          messages: []
+        };
+        const newSessionsList = [newSession, ...sessions];
+        setSessions(newSessionsList);
+        setSelectedSessionId(id);
+        try {
+          localStorage.setItem("aura_local_sessions", JSON.stringify(newSessionsList));
+        } catch {}
+        appendOfflineLog("info", `Allocated boot query session inside sandbox. ID: ${id}`);
+        setToast({ message: "AURA Session Allocated. Executing /start command...", type: "success" });
+        setIsCreatingPage(false);
+        updateOfflineStats(newSessionsList.length);
+        
+        // Dispatch start message target
+        await triggerSendMessageWithText(id, "/start");
+        return;
+      }
       try {
         const res = await fetch("/pages", {
           method: "POST",
@@ -333,6 +837,19 @@ export default function App() {
 
   const handleDeleteSession = async (id: string, e: MouseEvent) => {
     e.stopPropagation();
+    if (isOfflineMode) {
+      const remaining = sessions.filter(s => s.id !== id);
+      setSessions(remaining);
+      if (selectedSessionId === id) {
+        setSelectedSessionId(remaining.length > 0 ? remaining[0].id : null);
+      }
+      try {
+        localStorage.setItem("aura_local_sessions", JSON.stringify(remaining));
+      } catch {}
+      appendOfflineLog("warn", `Deleted local sandbox session thread. ID: ${id}`);
+      updateOfflineStats(remaining.length);
+      return;
+    }
     try {
       const res = await fetch(`/pages/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -350,9 +867,15 @@ export default function App() {
 
   const handleRenameSession = async (id: string, name: string) => {
     setEditingSessionId(null);
-    // Optimistic UI update
-    setSessions(prev => prev.map(s => s.id === id ? { ...s, name } : s));
-
+    const updatedSess = sessions.map(s => s.id === id ? { ...s, name } : s);
+    setSessions(updatedSess);
+    if (isOfflineMode) {
+      try {
+        localStorage.setItem("aura_local_sessions", JSON.stringify(updatedSess));
+      } catch {}
+      appendOfflineLog("info", `Renamed local session sandbox item to "${name}"`);
+      return;
+    }
     try {
       const res = await fetch(`/pages/${id}`, {
         method: "PUT",
@@ -384,6 +907,7 @@ export default function App() {
           return {
             ...s,
             busy: true,
+            status: "Simulating AURA pipeline...",
             messages: [
               ...s.messages,
               { role: "user", content: currentPrompt, timestamp: new Date().toISOString() },
@@ -393,6 +917,41 @@ export default function App() {
         return s;
       })
     );
+
+    if (isOfflineMode) {
+      appendOfflineLog("info", `Locally resolving prompt input sequence: "${currentPrompt.substring(0, 30)}..."`);
+      await new Promise((r) => setTimeout(r, 1200));
+      const simulatedResponse = generateChatGptSimulatedResponseLocal(currentPrompt);
+      const isStartText = currentPrompt === "/start";
+
+      setSessions((prev) => {
+        const updated = prev.map((s) => {
+          if (s.id === selectedSessionId) {
+            const finalMessages: ChatMessage[] = [
+              ...s.messages,
+              { role: "assistant", content: simulatedResponse, timestamp: new Date().toISOString() }
+            ];
+            return {
+              ...s,
+              busy: false,
+              status: isStartText ? "Active Terminal Ready (Local)" : "Ready (Local Sandbox)",
+              messages: finalMessages,
+              messagesCount: finalMessages.length,
+              lastMessageAt: new Date().toISOString()
+            };
+          }
+          return s;
+        });
+        try {
+          localStorage.setItem("aura_local_sessions", JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+
+      appendOfflineLog("success", `Simulated action completed gracefully: "${simulatedResponse.substring(0, 30)}..."`);
+      updateOfflineStats();
+      return;
+    }
 
     try {
       const res = await fetch(`/pages/${selectedSessionId}/messages`, {
@@ -420,6 +979,17 @@ export default function App() {
         }
       } catch (e: any) {
         alert(`Invalid JSON format: ${e.message}`);
+        return;
+      }
+
+      if (isOfflineMode) {
+        try {
+          localStorage.setItem("aura_local_cookies", JSON.stringify(parsed));
+        } catch {}
+        setCookieCount(parsed.length);
+        setTestResponseStatus("Cookies updated successfully in local sandbox!");
+        setTimeout(() => setTestResponseStatus(""), 4000);
+        appendOfflineLog("success", `Updated local cookies array stack. Total values: ${parsed.length}`);
         return;
       }
 
@@ -509,11 +1079,11 @@ export default function App() {
             Aura<br />Supercomputer
           </h1>
           <div className="flex flex-wrap items-center gap-3 mt-4">
-            <span className={`px-3 py-1 text-black font-bold text-xs uppercase tracking-widest ${stats?.browserConnected ? 'bg-[#D9FF00]' : 'bg-rose-500 text-white'}`}>
-              {stats?.browserConnected ? "AURA Active" : "AURA Offline"}
+            <span className={`px-3 py-1 text-black font-bold text-xs uppercase tracking-widest ${isOfflineMode ? 'bg-[#D9FF00]' : (stats?.browserConnected ? 'bg-[#D9FF00]' : 'bg-rose-500 text-white')}`}>
+              {isOfflineMode ? "SANDBOX ACTIVE" : (stats?.browserConnected ? "AURA Active" : "AURA Offline")}
             </span>
             <span className="text-white/40 font-mono text-[10px] uppercase tracking-widest italic bg-white/5 px-2 py-0.5 border border-white/10 text-[#D9FF00] font-bold">
-              Powered by OpenAI
+              {isOfflineMode ? "Offline Emulation" : "Powered by OpenAI"}
             </span>
             <button
               id="replay_intro_btn"
@@ -529,9 +1099,9 @@ export default function App() {
 
         {/* Right side controls & identifiers */}
         <div className="text-left md:text-right flex flex-col items-start md:items-end w-full md:w-auto">
-          <div className="text-[10px] font-mono text-white/40 mb-1 tracking-widest">ENDPOINT</div>
-          <div className="text-lg md:text-xl font-bold border-b border-white/20 font-mono tracking-tighter select-all">
-            localhost:3000
+          <div className="text-[10px] font-mono text-white/40 mb-1 tracking-widest">{isOfflineMode ? "RUNTIME STATUS" : "ENDPOINT"}</div>
+          <div className="text-lg md:text-xl font-bold border-b border-white/20 font-mono tracking-tighter select-all text-[#D9FF00]">
+            {isOfflineMode ? "AURA CLIENT SANDBOX" : "localhost:3000"}
           </div>
           
           <div className="mt-4 flex flex-wrap gap-2 w-full md:w-auto">
